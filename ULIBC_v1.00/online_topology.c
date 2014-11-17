@@ -117,7 +117,7 @@ static int get_string_procs(char *string, int *procs) {
   const char *sep = ",: ";
   char *comma = NULL;
   for (char *p = strtok_r(string, sep, &comma); p; p = strtok_r(NULL, sep, &comma)) {
-    printf("%s\t", p);
+    if (ULIBC_verbose() >= 3) printf("%s\t", p);
     const char *rangesep = "-";
     char *pp = NULL;
     int start = 0, stop = 0;
@@ -130,7 +130,7 @@ static int get_string_procs(char *string, int *procs) {
     else 
       goto done;
     if ( (pp = strtok(NULL, rangesep)) ) {
-      printf("[error] wrong processor list\n");
+      if (ULIBC_verbose() >= 3) printf("[error] wrong processor list\n");
       exit(1);
     }
     if (start > stop) {
@@ -138,12 +138,12 @@ static int get_string_procs(char *string, int *procs) {
       start = stop, stop = t;
     }
   done:
-    printf("\t");
+    if (ULIBC_verbose() >= 3) printf("\t");
     for (int i = start; i <= stop; ++i) {
       procs[online++] = i;
-      printf("%d,", i);
+      if (ULIBC_verbose() >= 3) printf("%d,", i);
     }
-    printf("\n");
+    if (ULIBC_verbose() >= 3) printf("\n");
   }
   online = uniq(procs, online, sizeof(int), qsort, cmpr_int);
   return online;
