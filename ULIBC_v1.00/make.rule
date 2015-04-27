@@ -1,6 +1,6 @@
 ifeq ($(HWLOC_BUILD), yes)
 ## Portable Hardware Locality (hwloc)
-HWLOC_VER  := 1.10.0
+HWLOC_VER  := 1.10.1
 HWLOC_TGZ  := hwloc-$(HWLOC_VER).tar.gz
 HWLOC_TAR  := hwloc-$(HWLOC_VER).tar
 HWLOC_DIR  := hwloc-$(HWLOC_VER)
