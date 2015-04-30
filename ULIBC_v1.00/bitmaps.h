@@ -225,7 +225,7 @@ static inline uint64_t is_test_and_set_bitmap(bitmap_t *bitmaps, int64_t x) {
 }
 
 
-static inline int test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x));
 #else
@@ -233,7 +233,7 @@ static inline int test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
 #endif
 }
 
-static inline int is_test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t is_test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x));
 #else
