@@ -138,7 +138,7 @@ static inline int next_bit_iter(bitmap_t *bits) {
 
 
 /* fetch-and-{and,or} */
-static inline uint64_t fetch_and_add_int64(int64_t *p, int64_t incr) {
+static inline int64_t fetch_and_add_int64(int64_t *p, int64_t incr) {
 #if defined(__GNUC__)
   return __sync_fetch_and_add(p,incr);
 #elif defined(__IBMC__) || defined(__IBMCPP__)
@@ -161,7 +161,7 @@ static inline uint64_t fetch_and_add_int64(int64_t *p, int64_t incr) {
 #endif
 }
 
-static inline uint64_t add_and_fetch_int64(int64_t *p, int64_t incr) {
+static inline int64_t add_and_fetch_int64(int64_t *p, int64_t incr) {
 #if defined(__GNUC__)
   return __sync_add_and_fetch(p,incr);
 #elif defined(__IBMC__) || defined(__IBMCPP__)
@@ -184,7 +184,7 @@ static inline uint64_t add_and_fetch_int64(int64_t *p, int64_t incr) {
 #endif
 }
 
-static inline int64_t fetch_and_or_uint64(uint64_t *p, uint64_t incr) {
+static inline uint64_t fetch_and_or_uint64(uint64_t *p, uint64_t incr) {
 #if defined(__GNUC__)
   return __sync_fetch_and_or(p,incr);
 #elif defined(__IBMC__) || defined(__IBMCPP__)
@@ -208,7 +208,7 @@ static inline int64_t fetch_and_or_uint64(uint64_t *p, uint64_t incr) {
 
 
 /* Test-and-set */
-static inline uint64_t test_and_set_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t test_and_set_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[BITMAP_WRD(x)], BITMAP_OFF(x));
 #else
@@ -216,7 +216,7 @@ static inline uint64_t test_and_set_bitmap(bitmap_t *bitmaps, int64_t x) {
 #endif
 }
 
-static inline uint64_t is_test_and_set_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t is_test_and_set_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[BITMAP_WRD(x)], BITMAP_OFF(x));
 #else
@@ -225,7 +225,7 @@ static inline uint64_t is_test_and_set_bitmap(bitmap_t *bitmaps, int64_t x) {
 }
 
 
-static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x));
 #else
@@ -233,7 +233,7 @@ static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x)
 #endif
 }
 
-static inline uint64_t is_test_and_set_summary_bitmap(bitmap_t *bitmaps, int64_t x) {
+static inline uint64_t is_test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x));
 #else
