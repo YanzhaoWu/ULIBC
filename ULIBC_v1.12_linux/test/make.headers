@@ -1,0 +1,7 @@
+hello_ulibc.o: hello_ulibc.c ../ulibc.h ../omp_helpers.h ../bitmaps.h
+test_numa.o: test_numa.c ../ulibc.h ../omp_helpers.h ../bitmaps.h
+test_numa_barrier.o: test_numa_barrier.c ../ulibc.h ../omp_helpers.h \
+ ../bitmaps.h
+test_numa_loop.o: test_numa_loop.c ../ulibc.h ../omp_helpers.h \
+ ../bitmaps.h
+test_numa_omp.o: test_numa_omp.c ../ulibc.h ../omp_helpers.h ../bitmaps.h
