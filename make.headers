@@ -1,0 +1,10 @@
+init.o: init.c ulibc.h omp_helpers.h bitmaps.h common.h
+numa_barrier.o: numa_barrier.c ulibc.h omp_helpers.h bitmaps.h common.h
+numa_loops.o: numa_loops.c ulibc.h omp_helpers.h bitmaps.h common.h
+numa_malloc.o: numa_malloc.c ulibc.h omp_helpers.h bitmaps.h common.h
+numa_mapping.o: numa_mapping.c ulibc.h omp_helpers.h bitmaps.h common.h
+numa_threads.o: numa_threads.c ulibc.h omp_helpers.h bitmaps.h common.h
+online_topology.o: online_topology.c ulibc.h omp_helpers.h bitmaps.h \
+ common.h
+tools.o: tools.c ulibc.h omp_helpers.h bitmaps.h
+topology.o: topology.c ulibc.h omp_helpers.h bitmaps.h common.h
