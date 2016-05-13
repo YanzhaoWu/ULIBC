@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+
 #include <ulibc.h>
 #include <common.h>
 

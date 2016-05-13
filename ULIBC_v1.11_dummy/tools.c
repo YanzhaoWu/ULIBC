@@ -24,6 +24,8 @@
 #include <assert.h>
 #include <ulibc.h>
 
+#include <common.h>
+
 double get_msecs(void) {
   struct timeval tv;
   assert( !gettimeofday(&tv, NULL) );
@@ -68,7 +70,73 @@ size_t uniq(void *base, size_t nmemb, size_t size,
   return crr;
 }
 
+#define PARENT(x) ( ((x)-1) >> 1 )
+#define LEFT(x)   ( ((x) << 1) + 1 )
 
+static inline void heapify(void *base, size_t size, size_t i,
+			   int (*compar)(const void *, const void *)) {
+  void *crr = memcpy(alloca(size), base+i*size, size);
+  while ( i > 0 && compar(base+PARENT(i)*size, crr) < 0 ) {
+    memcpy(base+i*size, base+PARENT(i)*size, size);
+    i = PARENT(i);
+  }
+  memcpy(base+i*size, crr, size);
+}
+
+static inline void extractmin(void *base, size_t size, size_t hqsz, void *buf,
+			      int (*compar)(const void *, const void *)) {
+  size_t i = 0, left = 1;
+  void *HQ_hqsz = memcpy(buf, base+hqsz*size, size);
+  
+  /* left and right */
+  size_t next;
+  while ( left+1 < hqsz ) {
+    if ( compar(base+left*size, base+(left+1)*size) > 0 ) {
+      next = left;
+    } else {
+      next = left+1;
+    }
+    if ( compar(base+next*size, HQ_hqsz) > 0 ) {
+      memcpy(base+i*size, base+next*size, size);
+      i = next;
+      left = LEFT(i);
+    } else {
+      break;
+    }
+  }
+  /* left only */
+  if ( left+1 == hqsz && compar(base+left*size, HQ_hqsz) > 0 ) {
+    memcpy(base+i*size, base+left*size, size);
+    i = left;
+  }
+  if (i != hqsz) {
+    memcpy(base+i*size, HQ_hqsz, size);
+  }
+}
+
+void uheapsort(void *base, size_t nmemb, size_t size,
+               int (*compar)(const void *, const void *)) {
+  /* heapify */
+  for (size_t i = 0; i < nmemb; ++i) {
+    heapify(base, size, i, compar);
+  }
+  
+  size_t bufsz = ROUNDUP( size, ULIBC_align_size() );
+  void *scratch = malloc(bufsz);
+  void *buf = malloc(bufsz);
+  memset(scratch, 0x00, bufsz);
+  memset(buf, 0x00, bufsz);
+  
+  /* extractmin */
+  for (size_t i = 0; i < nmemb; i++) {
+    memcpy(scratch, base, size);
+    extractmin(base, size, (nmemb-1)-i, buf, compar);
+    memcpy(base+(nmemb-1-i)*size, scratch, size);
+  }
+  
+  free( scratch );
+  free( buf );
+}
 
 /* ------------------------- *
  * Local variables:          *

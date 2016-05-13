@@ -31,18 +31,19 @@ int __online_proclist[MAX_CPUS];
 
 int __enable_online_procs;
 
-static int get_online_hwloc_pu(int *cpuset);
 static int get_string_procs(char *string, int *procs);
 
 int ULIBC_init_online_topology(void) {
-  double t;
+  /* double t; */
   char *proclist_env = getenv("ULIBC_PROCLIST");
   if ( !proclist_env ) {
-    PROFILED( t, __max_online_procs = get_online_hwloc_pu(__online_proclist) );
+    /* PROFILED( t, __max_online_procs = get_online_hwloc_pu(__online_proclist) ); */
+    __max_online_procs = 0;
   } else {
     if (ULIBC_verbose()) 
-      printf("ULIBC: ULIBC_PROCLIST=\"%s\"\n", proclist_env);
-    PROFILED( t, __max_online_procs = get_string_procs(proclist_env, __online_proclist) );
+      printf("ULIBC: ULIBC_PROCLIST=\"%s\" (ignored)\n", proclist_env);
+    /* PROFILED( t, __max_online_procs = get_string_procs(proclist_env, __online_proclist) ); */
+    __max_online_procs = 0;
   }
   
   if (__max_online_procs == 0) {
@@ -83,25 +84,6 @@ void ULIBC_print_online_topology(FILE *fp) {
     fprintf(fp, "\n");
   }
 }
-
-/* generates online processor list from hwloc */
-static int get_online_hwloc_pu(int *cpuset) {
-  int online = 0;
-  const int ncpus = ULIBC_get_num_procs();
-  hwloc_cpuset_t online_cpuset = hwloc_bitmap_alloc();
-  hwloc_bitmap_zero(online_cpuset);
-  hwloc_get_cpubind(ULIBC_get_hwloc_topology(), online_cpuset, HWLOC_CPUBIND_PROCESS);
-  bitmap_t found[ MAX_CPUS/64 ] = {0};
-  for (int i = 0; i < ncpus; ++i) {
-    struct cpuinfo_t ci = ULIBC_get_cpuinfo(i);
-    if ( hwloc_bitmap_isset(online_cpuset, ci.id) &&
-	 !is_test_and_set_bitmap(found, ci.id) )
-      cpuset[online++] = i;
-  }
-  hwloc_bitmap_free(online_cpuset);
-  return online;
-}
-
 
 /* generates online processor list from string */
 static int cmpr_int(const void *a, const void *b) {

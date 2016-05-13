@@ -21,7 +21,7 @@
 #define ULIBC_H
 
 #ifndef ULIBC_VERSION
-#define ULIBC_VERSION "ULIBC (version 1.00)"
+#define ULIBC_VERSION "ULIBC (version 1.10)"
 #endif
 
 #include <stdio.h>
@@ -125,7 +125,8 @@ extern "C" {
   extern int ULIBC_unbind_thread(void);
   extern int ULIBC_is_bind_thread(int pos, int target);
   extern long ULIBC_get_num_bind_threads(int id);
-    
+  extern hwloc_topology_t ULIBC_get_hwloc_topology_local(int id);
+      
   /* numa_barrier.c */
   extern int ULIBC_init_numa_barriers(void);
   extern void ULIBC_node_barrier(void);  
@@ -150,6 +151,8 @@ extern "C" {
 		     void (*sort)(void *base, size_t nmemb, size_t size,
 				  int(*compar)(const void *, const void *)),
 		     int (*compar)(const void *, const void *));
+  extern void uheapsort(void *base, size_t nmemb, size_t size,
+			int (*compar)(const void *, const void *));
 #if defined (__cplusplus)
 }
 #endif

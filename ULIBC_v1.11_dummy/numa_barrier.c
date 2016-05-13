@@ -33,7 +33,7 @@ static struct NUMA_barrier_t {
 
 int ULIBC_init_numa_barriers(void) {
   if (ULIBC_verbose())
-    printf("ULIBC: use NUMA local barrier based on pthread barrier (_POSIX_BARRIERS=%d)\n", (int)_POSIX_BARRIERS);
+    printf("ULIBC: enable NUMA-barrier using pthread_barrier (_POSIX_BARRIERS=%d)\n", (int)_POSIX_BARRIERS);
 #if _POSIX_BARRIERS > 0
   int wakeup_count = 0;
   

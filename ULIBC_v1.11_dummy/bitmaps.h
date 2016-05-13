@@ -31,7 +31,6 @@
 #define UI64_SHIFT2 (6ULL)
 #endif
 
-/* word and offset */
 #ifndef BITMAP_WRD
 #define BITMAP_WRD(idx) ( (idx) >>  UI64_SHIFT2   )
 #endif
@@ -47,60 +46,48 @@
 #ifndef INDEX
 #define INDEX(idx,off)  ( ((bitmap_t)(idx) << UI64_SHIFT2) + off )
 #endif
-/* #ifndef BITMASK */
-/* #define BITMASK(a, b, c)    ((((bitmap_t)(a) >> (b)) & (c))) */
-/* #endif */
-#define   SET_BITWRD(map,x)   map |=  (1ULL << (x))
-#define UNSET_BITWRD(map,x)   map &= ~(1ULL << (x))
-#define ISSET_BITWRD(map,x) ( map &   (1ULL << (x)) )
+#ifndef BITMASK
+#define BITMASK(a, b, c)    ((((bitmap_t)(a) >> (b)) & (c)))
+#endif
 
-#define   SET_BITMAP(map,x)   map[ BITMAP_WRD(x) ] |=  (1ULL << BITMAP_OFF(x))
-#define UNSET_BITMAP(map,x)   map[ BITMAP_WRD(x) ] &= ~(1ULL << BITMAP_OFF(x))
-#define ISSET_BITMAP(map,x) ( map[ BITMAP_WRD(x) ] &   (1ULL << BITMAP_OFF(x)) )
+static inline void SET_BITWRD(bitmap_t *wrd, uint64_t v) {
+  *wrd |=  (1ULL << v);
+}
+static inline void UNSET_BITWRD(bitmap_t *wrd, uint64_t v) {
+  *wrd &= ~(1ULL << v);
+}
+static inline int ISSET_BITWRD(bitmap_t *wrd, uint64_t v) {
+  return ( *wrd & (1ULL << v) ) != 0;
+}
 
-/* static inline void SET_BITWRD(bitmap_t *wrd, uint64_t v) { */
-/*   *wrd |=  (1ULL << v); */
-/* } */
-/* static inline void UNSET_BITWRD(bitmap_t *wrd, uint64_t v) { */
-/*   *wrd &= ~(1ULL << v); */
-/* } */
-/* static inline int ISSET_BITWRD(bitmap_t *wrd, uint64_t v) { */
-/*   return ( *wrd & (1ULL << v) ) != 0; */
-/* } */
-
-/* static inline void SET_BITMAP(bitmap_t *map, uint64_t v) { */
-/*   map[ BITMAP_WRD(v) ] |=  (1ULL << BITMAP_OFF(v)); */
-/* } */
-
-/* static inline void UNSET_BITMAP(bitmap_t *map, uint64_t v) { */
-/*   map[ BITMAP_WRD(v) ] &= ~(1ULL << BITMAP_OFF(v)); */
-/* } */
-
-/* static inline int ISSET_BITMAP(bitmap_t *map, uint64_t v) { */
-/*   return ( map[ BITMAP_WRD(v) ] & (1ULL << BITMAP_OFF(v)) ) != 0; */
-/* } */
-
+static inline void SET_BITMAP(bitmap_t *map, uint64_t v) {
+  map[ BITMAP_WRD(v) ] |=  (1ULL << BITMAP_OFF(v));
+}
+static inline void UNSET_BITMAP(bitmap_t *map, uint64_t v) {
+  map[ BITMAP_WRD(v) ] &= ~(1ULL << BITMAP_OFF(v));
+}
+static inline int ISSET_BITMAP(bitmap_t *map, uint64_t v) {
+  return ( map[ BITMAP_WRD(v) ] & (1ULL << BITMAP_OFF(v)) ) != 0;
+}
 
 static inline void SET_SUMMAP(bitmap_t *map, uint64_t v) {
   map[ SUMMAP_WRD(v) ] |=  (1ULL << SUMMAP_OFF(v));
 }
-
 static inline void UNSET_SUMMAP(bitmap_t *map, uint64_t v) {
   map[ SUMMAP_WRD(v) ] &= ~(1ULL << SUMMAP_OFF(v));
 }
-
 static inline int ISSET_SUMMAP(bitmap_t *map, uint64_t v) {
   return ( map[ SUMMAP_WRD(v) ] & (1ULL << SUMMAP_OFF(v)) ) != 0;
 }
 
-/* __clang__                          Clang/LLVM              */
-/* __GNUC__               [supported] gcc                     */
-/* __HP_cc,__HP_aCC                   HP C/aC++               */
-/* __IBMC__,__IBMCPP__    [supported] IBM XL C/C++            */
-/* __ICC                  [supported] Intel ICC/ICPC          */
-/* _MSC_VER                           Microsoft Visual Studio */
-/* __PGI                              Portland PGCC/PGCPP     */
-/* __SUNPRO_C,__SUNPRO_CC [supported] Oracle Solaris Studio   */
+/*            __clang__               Clang/LLVM              */
+/* [checked]  __GNUC__                gcc                     */
+/*            __HP_cc,__HP_aCC        HP C/aC++               */
+/* [checked]  __IBMC__,__IBMCPP__     IBM XL C/C++            */
+/* [checked]  __ICC                   Intel ICC/ICPC          */
+/*            _MSC_VER                Microsoft Visual Studio */
+/*            __PGI                   Portland PGCC/PGCPP     */
+/* [checked]  __SUNPRO_C,__SUNPRO_CC  Oracle Solaris Studio   */
 
 /* Find-first-set (ffs) or Counting-trailing-zeros (ctz) */
 /*     remark: ffs(x) = 1 + ctz(x) */
@@ -132,7 +119,7 @@ static inline int popcount_uint64(bitmap_t bits) {
 /* iterator */
 static inline int next_bit_iter(bitmap_t *bits) {
   const int i = cnttz_uint64(*bits);
-  UNSET_BITWRD(*bits,i);
+  UNSET_BITWRD(bits,i);
   return i;
 }
 
@@ -147,6 +134,29 @@ static inline int64_t fetch_and_add_int64(int64_t *p, int64_t incr) {
   return atomic_add_64_nv((uint64_t *)p,incr)-incr;
 #else
   int64_t oldval;
+#  if _OPENMP >= 200711
+  OMP("omp atomic capture") {
+    oldval = *p; *p += incr;
+  }
+#  else
+  OMP("omp critical") {
+    oldval = *p; *p += incr;
+  }
+  OMP("omp flush (p)");
+#  endif
+  return oldval;
+#endif
+}
+
+static inline uint64_t fetch_and_add_uint64(uint64_t *p, uint64_t incr) {
+#if defined(__GNUC__)
+  return __sync_fetch_and_add(p,incr);
+#elif defined(__IBMC__) || defined(__IBMCPP__)
+  return __fetch_and_addlp((volatile long *)p, (unsigned long)incr);
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+  return atomic_add_64_nv((uint64_t *)p,incr)-incr;
+#else
+  uint64_t oldval;
 #  if _OPENMP >= 200711
   OMP("omp atomic capture") {
     oldval = *p; *p += incr;
@@ -216,14 +226,16 @@ static inline uint64_t test_and_set_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #endif
 }
 
-static inline uint64_t is_test_and_set_bitmap(bitmap_t *bitmaps, uint64_t x) {
+static inline int is_test_and_set_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-  return atomic_set_long_excl((ulong_t *)&bitmaps[BITMAP_WRD(x)], BITMAP_OFF(x));
+  return atomic_set_long_excl((ulong_t *)&bitmaps[BITMAP_WRD(x)], BITMAP_OFF(x)) != 0;
 #else
-  return test_and_set_bitmap(bitmaps,x) & (1ULL << BITMAP_OFF(x));
+  return (test_and_set_bitmap(bitmaps,x) & (1ULL << BITMAP_OFF(x))) != 0;
 #endif
 }
 
+#define IS_TEST_AND_SET_BITMAP(bitmaps,x) \
+  (test_and_set_bitmap(bitmaps,x) & (1ULL << BITMAP_OFF(x)))
 
 static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
@@ -233,11 +245,11 @@ static inline uint64_t test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x
 #endif
 }
 
-static inline uint64_t is_test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x) {
+static inline int is_test_and_set_summary_bitmap(bitmap_t *bitmaps, uint64_t x) {
 #if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-  return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x));
+  return atomic_set_long_excl((ulong_t *)&bitmaps[SUMMAP_WRD(x)], SUMMAP_OFF(x)) != 0;
 #else
-  return test_and_set_bitmap(bitmaps,x) & (1ULL << SUMMAP_OFF(x));
+  return (test_and_set_bitmap(bitmaps,x) & (1ULL << SUMMAP_OFF(x))) != 0;
 #endif
 }
 

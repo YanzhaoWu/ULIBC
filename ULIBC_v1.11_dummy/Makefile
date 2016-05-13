@@ -1,6 +1,7 @@
 ULIBCDIR := .
 TESTDIR  := test
 -include make.rule
+# -include ../make.rule
 
 OBJECTS := \
 init.o \
@@ -24,25 +25,6 @@ $(LIBNAME): $(OBJECTS)
 	$(AR) $@ $^
 ifdef RANLIB
 	$(RANLIB) $@
-endif
-
-ifeq ($(HWLOC_BUILD), yes)
-
-# e.g.) hwloc-x.xx.tar.gz
-$(HWLOC_TGZ):
-	wget $(HWLOC_URL)
-
-# e.g.) hwloc-x.xx.tar
-$(HWLOC_TAR): $(HWLOC_TGZ)
-	gunzip -c $(HWLOC_TGZ) > $(HWLOC_TAR)
-
-# e.g.) hwloc-x.xx
-$(HWLOC_DIR): $(HWLOC_TAR)
-	@-(! test -e $(HWLOC_DIR)) && tar xvf $(HWLOC_TAR)
-
-# e.g.) hwloc
-$(HWLOC_HOME): $(HWLOC_DIR)
-	cd $(HWLOC_DIR) && ./configure $(HWLOC_CONFIG_OPTS) && make all && make install
 endif
 
 test: lib $(TESTDIR)/$(wildcard *.c)

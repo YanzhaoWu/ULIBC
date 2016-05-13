@@ -1,10 +1,12 @@
+ULIBCHOME := .
+
 ifeq ($(HWLOC_BUILD), yes)
 ## Portable Hardware Locality (hwloc)
 HWLOC_VER  := 1.10.1
 HWLOC_TGZ  := hwloc-$(HWLOC_VER).tar.gz
 HWLOC_TAR  := hwloc-$(HWLOC_VER).tar
 HWLOC_DIR  := hwloc-$(HWLOC_VER)
-HWLOC_HOME := $(ULIBCDIR)/hwloc
+HWLOC_HOME := $(ULIBCHOME)/hwloc
 HWLOC_INC  := $(HWLOC_HOME)/include
 HWLOC_LIB  := $(HWLOC_HOME)/lib
 HWLOC_URL  := http://www.open-mpi.org/software/hwloc/v1.10/downloads/$(HWLOC_TGZ)
@@ -15,8 +17,8 @@ LIBNAME  := libulibc.a
 ULIBC    := -lulibc
 
 ## CC flags
-CPPFLAGS  = $(addprefix -I, $(ULIBCDIR) $(HWLOC_INC))
-LDFLAGS   = $(addprefix -L, $(ULIBCDIR) $(HWLOC_LIB))
+CPPFLAGS  = $(addprefix -I, $(ULIBCHOME) $(HWLOC_INC))
+LDFLAGS   = $(addprefix -L, $(ULIBCHOME) $(HWLOC_LIB))
 LDLIBS   := -lulibc -lhwloc -lm
 CC       := gcc
 CFLAGS   := -g3
@@ -31,12 +33,12 @@ HWLOC_CONFIG_OPTS = --prefix=$(shell pwd)/$(HWLOC_HOME) --enable-shared=no --ena
 CFLAGS   += -qsmp=omp
 LDLIBS   += -qsmp=omp
 else ifeq ($(OS), osx)
-HWLOC_CONFIG_OPTS = --prefix=$(shell pwd)/$(HWLOC_HOME) --enable-shared=no --enable-static=yes --disable-pci --disable-cairo --disable-libxml2
-CFLAGS   += -O2 -fopenmp -Wall -Wextra -std=gnu99 -D_GNU_SOURCE
+HWLOC_CONFIG_OPTS = --prefix=$(shell pwd)/$(HWLOC_HOME) --enable-shared=no --enable-static=yes --disable-pci --disable-cairo --disable-libxml2 --disable-libnuma
+CFLAGS   += -O2 -fopenmp -Wall -Wextra -std=c99 -D_GNU_SOURCE
 LDLIBS   += -fopenmp
 else
 HWLOC_CONFIG_OPTS = --prefix=$(shell pwd)/$(HWLOC_HOME) --enable-shared=no --enable-static=yes --disable-pci --disable-cairo --disable-libxml2 --disable-libnuma
-CFLAGS   += -O2 -fopenmp -Wall -Wextra -std=gnu99 -D_GNU_SOURCE
+CFLAGS   += -O2 -fopenmp -Wall -Wextra -std=c99 -D_GNU_SOURCE
 LDLIBS   += -fopenmp
 endif
 
@@ -45,8 +47,14 @@ RM       := rm -rf
 AR       := ar -rcus
 RANLIB   := ranlib
 
-### for CPU-bind and memory
+### for memory allocator
+###     USE_MALLOC enabled => malloc
+###     USE_MALLOC disable => posix_memalign
 # CFLAGS += -DUSE_MALLOC
+
+### for NUMA barrier
+# USE_PTHREAD_BARRIER=yes
+USE_PTHREAD_BARRIER=no
 
 ### future work
 # CFLAGS += -DUSE_PTHREAD

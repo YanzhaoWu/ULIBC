@@ -31,6 +31,9 @@ hwloc_cpuset_t __curr_cpuset[MAX_CPUS];
 static long __num_bind[MAX_CPUS] = {0};
 static void bind_thread(void);
 
+static hwloc_topology_t __hwloc_topology_local[MAX_CPUS];
+hwloc_topology_t ULIBC_get_hwloc_topology_local(int id) { return __hwloc_topology_local[id]; }
+
 int ULIBC_init_numa_threads(void) {
   for (int i = 0; i < MAX_CPUS; ++i) {
     __bind_cpuset[i] = hwloc_bitmap_alloc();
@@ -47,10 +50,12 @@ int ULIBC_init_numa_threads(void) {
     /* get default affinity */
     const int id = omp_get_thread_num();
     
+    hwloc_topology_dup( &__hwloc_topology_local[id], ULIBC_get_hwloc_topology() );
+    
     const struct numainfo_t ni = ULIBC_get_numainfo( id );
     assert( ni.lnp == ULIBC_get_online_cores( ni.node ) );
     
-    hwloc_get_cpubind(ULIBC_get_hwloc_topology(),
+    hwloc_get_cpubind(ULIBC_get_hwloc_topology_local(id),
 		      __default_cpuset[id], HWLOC_CPUBIND_THREAD);
     bind_thread();
   }
@@ -97,7 +102,7 @@ static void bind_thread(void) {
   
   /* binds */
   if (c > 0) {
-    hwloc_set_cpubind(ULIBC_get_hwloc_topology(), cpuset, HWLOC_CPUBIND_THREAD);
+    hwloc_set_cpubind(ULIBC_get_hwloc_topology_local(id), cpuset, HWLOC_CPUBIND_THREAD);
     hwloc_bitmap_copy(__bind_cpuset[id], cpuset);
     ++__num_bind[id];
   }
@@ -109,7 +114,7 @@ int ULIBC_bind_thread(void) {
   if ( !omp_in_parallel() ) return 0;
   
   const int id = omp_get_thread_num();
-  hwloc_get_cpubind(ULIBC_get_hwloc_topology(), __curr_cpuset[id], HWLOC_CPUBIND_THREAD);
+  hwloc_get_cpubind(ULIBC_get_hwloc_topology_local(id), __curr_cpuset[id], HWLOC_CPUBIND_THREAD);
   if ( hwloc_bitmap_isequal(__bind_cpuset[id], __curr_cpuset[id]) ) {
     return 0;
   } else {
@@ -123,7 +128,7 @@ int ULIBC_unbind_thread(void) {
   if ( !omp_in_parallel() ) return 0;
   
   const int id = omp_get_thread_num();
-  hwloc_set_cpubind(ULIBC_get_hwloc_topology(), __default_cpuset[id], HWLOC_CPUBIND_THREAD);
+  hwloc_set_cpubind(ULIBC_get_hwloc_topology_local(id), __default_cpuset[id], HWLOC_CPUBIND_THREAD);
   return 1;
 }
 
