@@ -42,12 +42,12 @@ User can settle the affinity by `ULIBC_AFFINITY` environment as `ULIBC_AFFINITY`
 ULIBC supports _mapping_ from two processor mappings { `compact`, `scatter` } and _level_ from three binding levels { `fine` (`thread`), `core`, `socket` }.
 
 * Two processor mappings
-  + `compact` ... Specifying compact assigns threads in a position close to each other. However, it avoids assigning threads on a same physical core as possible as, when a system enables the hyper-threading.
-  + `scatter` ... Specifying scatter distributes the threads as evenly as possible across the online (available) processors on the entire system.
+    + `compact` ... Specifying compact assigns threads in a position close to each other. However, it avoids assigning threads on a same physical core as possible as, when a system enables the hyper-threading.
+    + `scatter` ... Specifying scatter distributes the threads as evenly as possible across the online (available) processors on the entire system.
 * Three binding levels
-  + `fine` (`thread`) ... Each thread binds into a logical processor.
-  + `core` ... Each thread binds into online (available) logical processors on a same physical core.
-  + `socket` ... Each thread binds into online (available) logical processors on a same socket.
+    + `fine` (`thread`) ... Each thread binds into a logical processor.
+    + `core` ... Each thread binds into online (available) logical processors on a same physical core.
+    + `socket` ... Each thread binds into online (available) logical processors on a same socket.
 
 #### Supported platform
 
@@ -74,13 +74,12 @@ int main(void) {
   /* initialize ULIBC variables */
   ULIBC_init();
 
-  /* OepnMP region with default affinity */
+  /* OepnMP region with default ULIBC affinity */
   _Pragma("omp parallel") {
     /* thread index */
     const int tid = ULIBC_get_thread_num();
-    ULIBC_bind_thread_explicit(tid);
 
-    /* NUMA placement */
+    /* current NUMA placement */
     const struct numainfo_t loc = ULIBC_get_numainfo( tid );
     printf("%d thread is running on NUMA-node %d Node-core %d\n",
            loc.id, loc.node, loc.core);
@@ -98,10 +97,10 @@ int main(void) {
 #### Requirements
 
 + C compiler (OpenMP supported)
-  + GCC
-  + Intel Compiler
-  + Oracle Sun CC
-  + IBM XLC
+    + GCC
+    + Intel Compiler
+    + Oracle Sun CC
+    + IBM XLC
 + (Optional) [Hardware Locality (HWLOC)](https://www.open-mpi.org/projects/hwloc/)
 
 We have tested on following systems.
@@ -156,23 +155,23 @@ $ make OS=Hwloc HWLOC_BUILD=yes
 #### Environment Variables
 
 * `ULIBC_ALIGNSIZE=N`
-  + Sets the alignment size in bytes to `N`. ULIBC uses this size in a first-touch after the memory allocation.
+    + Sets the alignment size in bytes to `N`. ULIBC uses this size in a first-touch after the memory allocation.
 * `ULBIC_AVOID_HTCORE=BOOL`
-  + 0: do nothing (default)
-  + 1: Avoids assigning threads to same physical cores as possible as.
+    + 0: do nothing (default)
+    + 1: Avoids assigning threads to same physical cores as possible as.
 * `ULIBC_AFFINITY=MAPPING:LEVEL`
-  + Specifies the `MAPPING` to { `compact`, `scatter` } and the `LEVEL` to { `fine`, `thread`, `core`, `socket` }.
+    + Specifies the `MAPPING` to { `compact`, `scatter` } and the `LEVEL` to { `fine`, `thread`, `core`, `socket` }.
 * `ULIBC_USE_SCHED_AFFINITY=BOOL`  
-  + 0: do nothing (default)
-  + 1: Uses external affinity (ULIBC does not constructs an affinity setting)
+    + 0: do nothing (default)
+    + 1: Uses external affinity (ULIBC does not constructs an affinity setting)
 * `ULIBC_PROCLIST=STRING`
-  + Specify an available processor list using processor indices, '-', and ','.
-  + c.g.) ULIBC_PROCLIST=0-3,8,19 indicates processors { 0, 1, 2, 3, 8, 19 }.
+    + Specify an available processor list using processor indices, '-', and ','.
+    + c.g.) ULIBC_PROCLIST=0-3,8,19 indicates processors { 0, 1, 2, 3, 8, 19 }.
 * `ULIBC_VERBOSE=N`
-  + Set the verbose level to N.
-  + 0: NOT prints some log (default)
-  + 1: prints partial information
-  + 2: prints all
+    + Set the verbose level to N.
+    + 0: NOT prints some log (default)
+    + 1: prints partial information
+    + 2: prints all
 
 
 #### Examples
