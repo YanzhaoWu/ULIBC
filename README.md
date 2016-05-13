@@ -74,13 +74,12 @@ int main(void) {
   /* initialize ULIBC variables */
   ULIBC_init();
 
-  /* OepnMP region with default affinity */
+  /* OepnMP region with default ULIBC affinity */
   _Pragma("omp parallel") {
     /* thread index */
     const int tid = ULIBC_get_thread_num();
-    ULIBC_bind_thread_explicit(tid);
 
-    /* NUMA placement */
+    /* current NUMA placement */
     const struct numainfo_t loc = ULIBC_get_numainfo( tid );
     printf("%d thread is running on NUMA-node %d Node-core %d\n",
            loc.id, loc.node, loc.core);
