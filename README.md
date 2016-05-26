@@ -160,8 +160,8 @@ $ make OS=Hwloc HWLOC_BUILD=yes
 * `ULBIC_AVOID_HTCORE=BOOL`
     + 0: do nothing (default)
     + 1: Avoids assigning threads to same physical cores as possible as.
-* `ULIBC_AFFINITY=MAPPING:LEVEL`
-    + Specifies the `MAPPING` to { `compact`, `scatter` } and the `LEVEL` to { `fine`, `thread`, `core`, `socket` }.
+* `ULIBC_AFFINITY=MAPPING:BINDING`
+    + Specifies the `MAPPING` to { `compact`, `scatter`, `external` } and the `BINDING` to { `fine`, `thread`, `core`, `socket` }.
 * `ULIBC_USE_SCHED_AFFINITY=BOOL`  
     + 0: do nothing (default)
     + 1: Uses external affinity (ULIBC does not constructs an affinity setting)
