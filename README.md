@@ -82,7 +82,7 @@ int main(void) {
 
     /* current NUMA placement */
     const struct numainfo_t loc = ULIBC_get_numainfo( tid );
-    printf("%d thread is running on NUMA-node %d Node-core %d\n",
+    printf("%d thread is running on NUMA-node %d NUMA-core %d\n",
            loc.id, loc.node, loc.core);
 
     /* do something */
