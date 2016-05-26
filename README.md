@@ -38,12 +38,13 @@ NUMA core index | NUMA local cores    | 0, 1, 2, ..., 15
 
 #### CPU affinity
 
-User can settle the affinity by `ULIBC_AFFINITY` environment as `ULIBC_AFFINITY`=_mapping_:_level_.
-ULIBC supports _mapping_ from two processor mappings { `compact`, `scatter` } and _level_ from three binding levels { `fine`, `thread`, `core`, `socket` }.
+User can settle the affinity by `ULIBC_AFFINITY` environment as `ULIBC_AFFINITY`=_mapping_:_binding_.
+ULIBC supports _mapping_ from two processor mappings { `compact`, `scatter`, `external` } and _binding_ from three binding levels { `fine`, `thread`, `core`, `socket` }.
 
 * Two processor mappings
     + `compact` ... Specifying compact assigns threads in a position close to each other. However, it avoids assigning threads on a same physical core as possible as, when a system enables the hyper-threading.
     + `scatter` ... Specifying scatter distributes the threads as evenly as possible across the online (available) processors on the entire system.
+    + `external` ... Specifying external do nothing for external affinity setting
 * Three binding levels
     + `fine` (`thread`) ... Each thread binds into a logical processor.
     + `core` ... Each thread binds into online (available) logical processors on a same physical core.
