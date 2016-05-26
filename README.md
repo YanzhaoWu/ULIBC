@@ -75,10 +75,13 @@ int main(void) {
   /* initialize ULIBC variables */
   ULIBC_init();
 
-  /* OepnMP region with default ULIBC affinity */
+  /* OepnMP region with ULIBC affinity */
   _Pragma("omp parallel") {
     /* thread index */
     const int tid = ULIBC_get_thread_num();
+    
+    /* thread binding */
+    ULIBC_bind_thread_explicit(tid);
 
     /* current NUMA placement */
     const struct numainfo_t loc = ULIBC_get_numainfo( tid );
