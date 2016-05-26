@@ -64,7 +64,7 @@ Others   | not exist     | --          | supported   | recommended
 
 #### Minimal code
 
-Here is minimal code using ULIBC. At first, the `ULIBC_init()` function initializes ULIBC data structure, in which detects hardware topology runtime and make affinity using `ULIBC_bind_thread_explicit()` at OpenMP region. Each thread obtains a placement using `ULIBC_get_numainfo()`.
+Here is minimal code using ULIBC. At first, the `ULIBC_init()` function initializes the ULIBC data structure, in which ULIBC detects hardware topology runtime. Each thread is pinned on a processing element via `ULIBC_bind_thread_explicit()` at OpenMP region, and obtains a placement using `ULIBC_get_numainfo()`.
 
 ```
 #include <stdio.h>
