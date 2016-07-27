@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <syscall.h>
+#include <linux/mempolicy.h>
 
 #include <ulibc.h>
 #include <common.h>
@@ -48,55 +49,33 @@ char *ULIBC_get_memory_name(void) {
 void *NUMA_malloc(size_t size, const int onnode) {
   if (size == 0)
     return NULL;
-  
+
   const int node = ULIBC_get_online_nodeidx(onnode);
   void *p = NULL;
-  
+
 #if defined(USE_MMAP)
-#  ifdef __ia64__
-#    define ADDR (void *)(0x8000000000000000UL)
-#    define FLAGS (MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED)
-#  else
-#    define ADDR (void *)(0x0UL)
-#    define FLAGS (MAP_PRIVATE | MAP_ANONYMOUS)
-#  endif
-  p = mmap(ADDR, size, (PROT_READ | PROT_WRITE), FLAGS, 0, 0);
+  p = mmap( 0, size, (PROT_READ | PROT_WRITE), (MAP_PRIVATE | MAP_ANONYMOUS), 0, 0 );
   if (ULIBC_verbose() > 1)
     printf("ULIBC: NUMA %d on socket %d allocates %ld Bytes using mmap "
 	   "(%ld bytes aligned)\n", onnode, node, size, ULIBC_align_size());
   if ( ULIBC_enable_numa_mapping() &&
        ( 0 <= onnode && onnode < ULIBC_get_online_nodes() ) ) {
     unsigned long mask[MAX_NODES/sizeof(unsigned long)] = {0};
-    const int wrd = node / 64, off = node % 64;
-    mask[wrd] = (1ULL << off);
-    enum MBIND_MODE {
-      MPOL_MF_STRICT   = (1<<0), /* Verify existing pages in the mapping */
-      MPOL_MF_MOVE     = (1<<1), /* Move pages owned by this process to conform to mapping */
-      MPOL_MF_MOVE_ALL = (1<<2)	/* Move every page to conform to mapping */
-    };
-    enum MBIND_FLAGS {
-      MPOL_DEFAULT     = (0),
-      MPOL_PREFERRED   = (1),
-      MPOL_BIND        = (2),
-      MPOL_INTERLEAVE  = (3)
-    };
-    mbind(p, size, MPOL_PREFERRED, mask, MAX_NODES, MPOL_MF_MOVE);
+    mask[node / 64] |= (1ULL << (node % 64));
+    mbind( p, size, MPOL_BIND | MPOL_F_STATIC_NODES, mask, MAX_NODES, MPOL_MF_MOVE );
   }
-  
 #elif defined(USE_MALLOC)
   if (ULIBC_verbose() > 1)
     printf("ULIBC: NUMA %d on socket %d allocates %ld Bytes using malloc\n",
 	   onnode, node, size);
   p = malloc(size);
-  
 #else
   if (ULIBC_verbose() > 1)
     printf("ULIBC: NUMA %d on socket %d allocates %ld Bytes using posix_memalign "
 	   "(%ld bytes aligned)\n", onnode, node, size, ULIBC_align_size());
   posix_memalign((void *)&p, ULIBC_align_size(), size);
-  
 #endif
-  
+
   return p;
 }
 
