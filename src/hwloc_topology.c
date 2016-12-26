@@ -26,7 +26,7 @@
 static char __version[256];
 char *ULIBC_version(void) { return __version; }
 void ULIBC_set_version(void) { 
-  sprintf(__version, "ULIBC-%s-hwloc", ULIBC_VERSION);
+  sprintf(__version, "ULIBC-%s-hwloc(%s)", ULIBC_VERSION, get_cc_version());
 }
 
 static hwloc_topology_t __hwloc_topology;

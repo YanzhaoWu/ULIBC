@@ -106,6 +106,7 @@ extern "C" {
 #endif
   void prange(long len, long off, long np, long id, long *ls, long *le);
   int is_online_proc(int proc);
+  char *get_cc_version(void);
   void ULIBC_set_version(void);
   int ULIBC_init_topology(void);
   int ULIBC_init_online_topology(void);

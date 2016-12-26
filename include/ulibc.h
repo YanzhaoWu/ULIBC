@@ -21,7 +21,7 @@
 #define ULIBC_H
 
 #ifndef ULIBC_VERSION
-#define ULIBC_VERSION "1.20"
+#define ULIBC_VERSION "1.30"
 #endif
 
 #include <stdio.h>
@@ -46,19 +46,51 @@
  *   uses scheduler affinity
  *   Usage: ULIBC_USE_SCHED_AFFINITY=1 KMP_AFFINITY=compact,granularity=fine ./a.out
  *
- * ULIBC_PROCLIST (default: not used)
- *   processor list
- *   Usage: ULIBC_PROCLIST=0-3 ./a.out
+ * ULIBC_PROCLIST (default: '')
+ *   processor list for processor affinity
+ *   Usage: ULIBC_PROCLIST=0-2,3 ./a.out
  *
  * ULIBC_VERBOSE (default: 0)
  *   verbose level = {0,1,2}
  *   Usage: ULIBC_VERBOSE=1 ./a.out
+ *
+ * ULIBC_MEMBIND (default: '')
+ *   node list for memory binding
+ *   Usage: ULIBC_MEMBIND=0-2,3 ./a.out
  *
  * ------------------------------------------------------------------------------- */
 
 #if defined (__cplusplus)
 extern "C" {
 #endif
+  enum ulibc_mempol_t {
+    ULIBC_MPOL_DEFAULT    = (0),
+    ULIBC_MPOL_BIND       = (1),
+    ULIBC_MPOL_INTERLEAVE = (2),
+    ULIBC_MPOL_MAX        = (3),
+  };
+
+  /* tools.c (beta) */
+  long make_nodemask_sscanf(const char *s, unsigned long maxnode, unsigned long *nodemask);
+  long make_nodemask_online(unsigned long maxnode, unsigned long *nodemask);
+  char *sprintf_ulong_bits(char *buf, unsigned long mask);
+  void show_bitmap(const unsigned long maxnode, const unsigned long *nodemask);
+
+  /* linux_numa_malloc.c (beta) */
+  const char *ULIBC_get_mempol_mode_name(int mode);
+  void ULIBC_print_memory_pool(void);
+  void ULIBC_touch_memory_pool(void);
+  void ULIBC_touch_memory_pool_naive(void);
+  size_t ULIBC_memory_usage_node(unsigned long maxnode, size_t *usage);
+  size_t ULIBC_memory_usage(void);
+  void *ULIBC_malloc_explict(size_t size, int mpol, unsigned long *nodemask, unsigned long maxnode);
+  void *ULIBC_malloc_mempol(size_t size, int mpol);
+  void *ULIBC_malloc_bind(size_t size, int node);
+  void *ULIBC_malloc_interleave(size_t size);
+  void ULIBC_free(void *ptr);
+  void ULIBC_all_free(void);
+  void ULIBC_finalize(void);
+  
   /* init.c */
   int ULIBC_init(void);
   int ULIBC_verbose(void);

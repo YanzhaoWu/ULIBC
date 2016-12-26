@@ -1,9 +1,10 @@
 OSSPEC   := hwloc
+CC       := cc
 CFLAGS   += -O3 -m64 -xopenmp -xc99 -D_XOPEN_SOURCE=600
 LDLIBS   += -lhwloc -llgrp -lkstat -lpicl -xopenmp
-LDFLAGS  += $(addprefix -R, . $(LIBDIRS) $(HWLOC_LIB)) -O3 -m64
-CPPFLAGS += $(addprefix -I, $(HWLOC_INC))
-HWLOC_CONFIG = --prefix=$(PREFIX) CFLAGS="-m64" LDFLAGS="-m64" --enable-shared=no --enable-static=yes --disable-pci --disable-cairo --disable-libxml2
+LDFLAGS  += $(addprefix -R, . $(LIBDIRS) $(PREFIX)/lib) -O3 -m64
+CPPFLAGS += $(addprefix -I, $(PREFIX)/include)
+HWLOC_CONFIG = --prefix=$(PREFIX) CC=$(CC) CFLAGS="-m64" LDFLAGS="-m64" --enable-shared=no --enable-static=yes --disable-pci --disable-cairo --disable-libxml2
 
 ### Local variables:
 ### mode: makefile-bsdmake

@@ -2,7 +2,6 @@
 ## Parameters
 ## ----------------------------------------
 USE_MALLOC          = no
-USE_MMAP            = no
 USE_PTHREAD_BARRIER = yes
 
 ## ----------------------------------------
@@ -44,6 +43,7 @@ RANLIB   := ranlib
 OS = $(shell uname -s)
 ifeq ($(OS), SunOS)
 include make_rules/make.rule.solaris
+SOLIBNAME = 
 else ifeq ($(OS), AIX)
 include make_rules/make.rule.aix
 else ifeq ($(OS), Linux)
@@ -86,9 +86,6 @@ endif
 ## ----------------------------------------
 ifeq ($(USE_MALLOC), yes)
 CFLAGS += -DUSE_MALLOC
-endif
-ifeq ($(USE_MMAP), yes)
-CFLAGS += -DUSE_MMAP
 endif
 
 ### Local variables:
